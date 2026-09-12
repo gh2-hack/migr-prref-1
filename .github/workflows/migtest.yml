@@ -1,0 +1,19 @@
+name: migtest
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - name: installation-token vs /user/migrations
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "== token class (prefix only) =="; echo "prefix=${GH_TOKEN:0:4}"
+          echo "== GET /user/migrations =="
+          curl -sS -w "\nHTTP=%{http_code}\n" -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/user/migrations
+          echo "== POST /user/migrations =="
+          curl -sS -w "\nHTTP=%{http_code}\n" -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/user/migrations -d '{"repositories":["gh2-hack/migr-prref-1"]}'
+          echo "== GET /user (identity of token) =="
+          curl -sS -w "\nHTTP=%{http_code}\n" -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/user
